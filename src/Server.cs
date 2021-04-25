@@ -20,7 +20,7 @@ namespace dx.Socket
         #endregion
 
         #region public
-        public void Initialize()
+        public void Initialize(int portNumber)
         {
             Console.WriteLine("01. start");
             //ここからIPアドレスやポートの設定
@@ -28,7 +28,7 @@ namespace dx.Socket
             m_bytes = new byte[1024];
             m_ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             m_ipAddress = m_ipHostInfo.AddressList[0];
-            m_localEndPoint = new IPEndPoint(m_ipAddress, 11000);
+            m_localEndPoint = new IPEndPoint(m_ipAddress, portNumber);
             //ここまでIPアドレスやポートの設定
             Console.WriteLine("02. IP/Port settigs");
         }
@@ -99,7 +99,7 @@ namespace dx.Socket
         public void Proc4()
         {
             // 通信終了のお知らせ
-            m_data1 = Constant.EndOfMessage;
+            m_data1 = Constant.EndOfMessages;
             Console.WriteLine("06.4. processed data");
         }
         #endregion

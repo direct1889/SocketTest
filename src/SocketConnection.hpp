@@ -21,6 +21,16 @@ int sendImpl(int socketDescriptor, char* msg, int msgSize);
 namespace constant {
     const char endOfMessage = '\n';
     const std::string endOfMessages = "quit";
+
+    // client
+    constexpr int MAX_MSG_SIZE = 1024;
+    constexpr int MSG_SIZE_CLIENT = 32;
+    constexpr int BUF_SIZE_CLIENT = MSG_SIZE_CLIENT + 1; // 末尾にヌル文字を足すので+1
+
+    // server
+    constexpr int QUEUE_LIMIT =  5;
+    constexpr int MSG_SIZE_SERVER = 1024;
+    constexpr int BUF_SIZE_SERVER = MSG_SIZE_SERVER + 1; // 末尾にヌル文字を足すので+1
 }
 
 class IClient {

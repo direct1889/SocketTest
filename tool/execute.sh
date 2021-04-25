@@ -27,10 +27,13 @@ fi
 echo "type: ${TYPE}, side: ${SIDE}"
 if [ $TYPE == "Cs" ]; then
     SCRIPT_NAME="SocketCs.exe"
-    echo "mono \"${EXE_DIR}${SCRIPT_NAME} ${SCRIPT_ARGS}\""
-    mono "${EXE_DIR}${SCRIPT_NAME} ${SCRIPT_ARGS}"
+    COMMAND="mono \"${EXE_DIR}${SCRIPT_NAME} Simple ${SCRIPT_ARGS}\""
+    echo ${COMMAND}
+    # eval "${COMMAND}"
+    eval "mono ${EXE_DIR}${SCRIPT_NAME} Simple ${SCRIPT_ARGS}"
 else
     SCRIPT_NAME="SocketCpp"
-    echo "${EXE_DIR}${SCRIPT_NAME} ${TYPE} ${SCRIPT_ARGS}"
-    ${EXE_DIR}${SCRIPT_NAME} ${TYPE} ${SCRIPT_ARGS}
+    COMMAND="${EXE_DIR}${SCRIPT_NAME} ${TYPE} ${SCRIPT_ARGS}"
+    echo ${COMMAND}
+    eval "${COMMAND}"
 fi

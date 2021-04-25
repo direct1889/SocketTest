@@ -8,11 +8,10 @@ namespace socket {
 class SimpleClient final : public IClient {
     private: // constant
     private: // field
-        char m_buf[32];
-        sockaddr_in m_server;
-        int m_n = 0;
-        int m_sock = 0;
-        std::string m_data1;
+        int m_socketDescriptor = 0;
+        sockaddr_in m_serverSocketAddress;
+        char m_sendBuffer[constant::BUF_SIZE_CLIENT];
+        char m_receiveBuffer[constant::BUF_SIZE_CLIENT];
 
     public: // public
         void initialize(int portNumber, const std::string& ipAddressStr) override;
