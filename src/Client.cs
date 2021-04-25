@@ -3,23 +3,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace socketC
+namespace dx.Socket
 {
-    class Client
-    {
-        #region static
-        static readonly string EndOfMessage = "EOM";
-        #endregion
-
+    class Client : IClient {
         #region field
-        string m_st;
+        string m_msg;
 
         byte[] m_bytes;
         IPHostEntry m_ipHostInfo;
         IPAddress m_ipAddress;
         IPEndPoint m_remoteEP;
 
-        Socket m_socket;
+        System.Net.Sockets.Socket m_socket;
 
         string m_data1;
         #endregion
@@ -27,6 +22,7 @@ namespace socketC
         #region public
         public void Initialize()
         {
+            m_msg = "Hello World!";
             Console.WriteLine("01. start");
             //IPアドレスやポートを設定している。
             m_ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -38,7 +34,7 @@ namespace socketC
         public void CreateSocket()
         {
             //ソケットを作成
-            m_socket = new Socket(m_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            m_socket = new System.Net.Sockets.Socket(m_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             Console.WriteLine("03. created socket");
         }
 
@@ -53,14 +49,14 @@ namespace socketC
         public void Send()
         {
             //Sendで送信している。
-            byte[] msg = Encoding.UTF8.GetBytes(m_st + "<EOF>");
+            byte[] msg = Encoding.UTF8.GetBytes(m_msg + "<EOF>");
             m_socket.Send(msg);
             Console.WriteLine("Succeeded to sent message!");
             Console.WriteLine(msg);
             Console.WriteLine("05. sent data");
         }
 
-        public void Receive()
+        public bool Receive()
         {
             //Receiveで受信している
             m_bytes = new byte[1024];
@@ -69,6 +65,8 @@ namespace socketC
             Console.WriteLine("Succeeded to receive message!");
             Console.WriteLine(m_data1);
             Console.WriteLine("06. received data");
+
+            return m_data1 == Constant.EndOfMessage;
         }
 
         public void ShutdownAndClose()
@@ -78,34 +76,6 @@ namespace socketC
             m_socket.Close();
             Console.WriteLine("07. shutdown and closed");
         }
-
-        public void Execute(string st)
-        {
-            m_st = st;
-            Initialize();
-            CreateSocket();
-            RequestConnection();
-            Send();
-            while (true)
-            {
-                Receive();
-                if (m_data1 == EndOfMessage) {
-                    break;
-                }
-            }
-            ShutdownAndClose();
-        }
         #endregion
-    }
-
-    class C
-    {
-        public static void Main()
-        {
-            //今回送るHello World!
-            string st = "Hello World!";
-            Client client = new Client();
-            client.Execute(st);
-        }
     }
 }

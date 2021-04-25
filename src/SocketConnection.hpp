@@ -19,16 +19,18 @@ int sendImpl(int socketDescriptor, const std::string& msg, int msgSize);
 int sendImpl(int socketDescriptor, char* msg, int msgSize);
 
 namespace constant {
-    const std::string endOfMessage = "EOM";
+    const char endOfMessage = '\n';
+    const std::string endOfMessages = "quit";
 }
 
 class IClient {
     public:
-        virtual void initialize() = 0;
+        virtual void initialize(int portNumber, const std::string& ipAddressStr) = 0;
         virtual void createSocket() = 0;
         virtual void requestConnection() = 0;
+        virtual void prepareSendData() = 0;
         virtual void send() = 0;
-        virtual bool receive() = 0; // @return 受信データが終端に達したらtrue
+        virtual void receive() = 0;
         virtual void shutdownAndClose() = 0;
     protected:
         IClient() = default;
@@ -38,7 +40,7 @@ class IClient {
 
 class IServer {
     public:
-        virtual void initialize() = 0;
+        virtual void initialize(int portNumber) = 0;
         virtual void createSocketAndStandBy() = 0;
         virtual void waitAccess() = 0;
         virtual void receive() = 0;

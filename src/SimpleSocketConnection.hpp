@@ -15,11 +15,12 @@ class SimpleClient final : public IClient {
         std::string m_data1;
 
     public: // public
-        void initialize() override;
+        void initialize(int portNumber, const std::string& ipAddressStr) override;
         void createSocket() override;
         void requestConnection() override;
+        void prepareSendData() override;
         void send() override;
-        bool receive() override;
+        void receive() override;
         void shutdownAndClose() override;
 
     public: // ctor/dtor
@@ -38,7 +39,7 @@ class SimpleServer final : public IServer {
         std::string m_data1;
 
     public: // public
-        void initialize() override;
+        void initialize(int portNumber) override;
         void createSocketAndStandBy() override;
         void waitAccess() override;
         void receive() override;

@@ -9,14 +9,14 @@
 namespace dx {
 namespace socket {
 
-void SimpleServer::initialize() {
+void SimpleServer::initialize(const int portNumber) {
     std::cout << "<Test.Socket> " << "01. " << "start" << std::endl;
     // IPアドレス/ポート設定
     m_addr.sin_family = AF_INET; // プロトコル
     // ポート番号
     // 1024はLinuxSysが使うので避ける
     // htons(): ビッグエンディアンに変換
-    m_addr.sin_port = htons(12345);
+    m_addr.sin_port = htons(portNumber);
     m_addr.sin_addr.s_addr = INADDR_ANY;
     m_addr.sin_len = sizeof(m_addr);
     std::cout << "<Test.Socket> " << "02. " << "IP/Port settings" << std::endl;
@@ -92,7 +92,7 @@ void SimpleServer::proc3() {
     std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), toupper);
 }
 void SimpleServer::proc4() {
-    m_data1 = constant::endOfMessage;
+    m_data1 = constant::endOfMessages;
 }
 
 }

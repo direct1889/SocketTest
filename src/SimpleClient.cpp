@@ -8,12 +8,12 @@
 namespace dx {
 namespace socket {
 
-void SimpleClient::initialize() {
+void SimpleClient::initialize(const int portNumber, const std::string& ipAddressStr) {
     std::cout << "<Test.Socket> " << "01. " << "start" << std::endl;
     // 接続先設定
     m_server.sin_family = AF_INET;
-    m_server.sin_port = htons(12345);
-    m_server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    m_server.sin_port = htons(portNumber);
+    m_server.sin_addr.s_addr = inet_addr(ipAddressStr.c_str());
     std::cout << "<Test.Socket> " << "02. " << "IP/Port settings" << std::endl;
 }
 
@@ -29,19 +29,19 @@ void SimpleClient::requestConnection() {
     std::cout << "<Test.Socket> " << "04. " << "established network" << std::endl;
 }
 
-void SimpleClient::send() {
+void SimpleClient::prepareSendData() {}
+void SimpleClient::send() {}
 
-}
-
-bool SimpleClient::receive() {
+void SimpleClient::receive() {
     // 通信
-    memset(m_buf, 0, sizeof(m_buf));
-    m_n = receiveImpl(m_sock, m_buf, sizeof(m_buf));
-    m_data1 = std::string(m_buf);
-    std::cout << "<Test.Socket> " << m_n << ", " << m_data1 << std::endl;
-    std::cout << "<Test.Socket> " << "06. " << "received data" << std::endl;
-
-    return m_data1 == constant::endOfMessage;
+    while (true) {
+        memset(m_buf, 0, sizeof(m_buf));
+        m_n = receiveImpl(m_sock, m_buf, sizeof(m_buf));
+        m_data1 = std::string(m_buf);
+        std::cout << "<Test.Socket> " << m_n << ", " << m_data1 << std::endl;
+        std::cout << "<Test.Socket> " << "06. " << "received data" << std::endl;
+        if (m_data1 == constant::endOfMessages) { break; }
+    }
 }
 
 void SimpleClient::shutdownAndClose() {
