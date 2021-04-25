@@ -3,6 +3,7 @@ using Client = dx.Socket.Client;
 using IServer = dx.Socket.IServer;
 using Server = dx.Socket.Server;
 using Enum = System.Enum;
+using Encoding = System.Text.Encoding;
 
 class SocketMain
 {
@@ -11,8 +12,13 @@ class SocketMain
         client.Initialize(portNumber, ipAddressStr);
         client.CreateSocket();
         client.RequestConnection();
-        client.Send();
+
+        client.Send(Encoding.UTF8.GetBytes("くみれい"));
         client.Receive();
+        client.Send(Encoding.UTF8.GetBytes("ライきり"));
+        client.Receive();
+        client.Send(Encoding.UTF8.GetBytes("まいひめ"));
+
         client.ShutdownAndClose();
     }
 
@@ -21,15 +27,13 @@ class SocketMain
         server.Initialize(portNumber);
         server.CreateSocketAndStandBy();
         server.WaitAccess();
+
         server.Receive();
-        server.Proc1();
-        server.Send();
-        server.Proc2();
-        server.Send();
-        server.Proc3();
-        server.Send();
-        server.Proc4();
-        server.Send();
+        server.Send(Encoding.UTF8.GetBytes("あおひな"));
+        server.Receive();
+        server.Send(Encoding.UTF8.GetBytes("あだしま"));
+        server.Receive();
+
         server.ShutdownAndClose();
     }
 

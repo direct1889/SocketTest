@@ -32,7 +32,7 @@ namespace dx.Socket
         void Initialize(int portNumber, string ipAddressStr);
         void CreateSocket();
         void RequestConnection();
-        void Send();
+        void Send(byte[] data);
         void Receive();
         void ShutdownAndClose();
     }
@@ -41,13 +41,8 @@ namespace dx.Socket
         void Initialize(int portNumber);
         void CreateSocketAndStandBy();
         void WaitAccess();
+        void Send(byte[] data);
         void Receive();
-        void Send();
         void ShutdownAndClose();
-
-        void Proc1();
-        void Proc2();
-        void Proc3();
-        void Proc4();
     }
 }
