@@ -29,12 +29,18 @@ void SimpleClient::requestConnection() {
     std::cout << "<Test.Socket> " << "04. " << "established network" << std::endl;
 }
 
-void SimpleClient::prepareSendData() {}
-void SimpleClient::send() {}
+void SimpleClient::prepareSendData() {
+    memset(m_sendBuffer, 0, sizeof(m_sendBuffer)); // 確保した領域を0クリア
+    std::string("Hello").copy(m_sendBuffer, 5);
+}
+void SimpleClient::send() {
+    sendImpl(m_socketDescriptor, m_sendBuffer, strlen(m_sendBuffer));
+}
 
 void SimpleClient::receive() {
     // 通信
-    while (true) {
+    int max = 5;
+    while (--max >= 0) {
         memset(m_receiveBuffer, 0, sizeof(m_receiveBuffer));
         const auto byteReceived = receiveImpl(m_socketDescriptor, m_receiveBuffer, sizeof(m_receiveBuffer));
         std::string receivedStr(m_receiveBuffer);

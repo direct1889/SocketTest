@@ -37,7 +37,8 @@ class SimpleServer final : public IServer {
         sockaddr_in m_clientSocketAddress;
         char m_sendBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
         char m_receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
-        std::string m_data1;
+        int m_sendMsgSize = 0; // send buffer size
+        int m_receiveMsgSize = 0; // recieve buffer size
 
     public: // public
         void initialize(int portNumber) override;

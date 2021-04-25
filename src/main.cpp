@@ -42,14 +42,12 @@ enum class Mode {
 };
 
 Side strToSide(const std::string& str) {
-    std::cout << str << " to side" << std::endl;
     if (str == "Client") { return Side::CLIENT; }
     else if (str == "Server") { return Side::SERVER; }
     else { return Side::INVALID; }
 }
 
 Mode strToMode(const std::string& str) {
-    std::cout << str << " to mode" << std::endl;
     if (str == "Simple") { return Mode::SIMPLE; }
     else if (str == "Legacy") { return Mode::LEGACY; }
     else { return Mode::INVALID; }
@@ -72,10 +70,8 @@ std::string toString(const Mode mode) {
 }
 
 int main(const int argc, const char* argv[]) {
-    std::cout << argv[1] << ", " << argv[2] << ", " << argv[3] << ", " << argv[4] << std::endl;
     const Mode mode = strToMode(std::string(argv[1]));
     const Side side = strToSide(std::string(argv[2]));
-    std::cout << toString(side) << ", " << toString(mode) << std::endl;
 
     switch (side) {
     case Side::CLIENT: {

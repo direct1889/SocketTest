@@ -37,8 +37,8 @@ class LegacyServer final : public IServer {
         sockaddr_in m_clientSocketAddress; // client internet socket address
         char m_sendBuffer[constant::BUF_SIZE_SERVER]; // send temporary buffer
         char m_receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
-        int m_sendMsgSize; // send buffer size
-        int m_receiveMsgSize; // recieve buffer size
+        int m_sendMsgSize = 0; // send buffer size
+        int m_receiveMsgSize = 0; // recieve buffer size
 
     public: // public
         void initialize(int portNumber) override;

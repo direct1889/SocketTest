@@ -45,6 +45,7 @@ void SimpleServer::waitAccess() {
     const int tryCountMax = 5;
     int tryCount = 0;
     while (tryCount < tryCountMax) {
+        std::cout << "- accept...: " << std::endl;
         m_clientSocketDescriptor = accept(
             m_serverSocketDescriptor, // Server 側のソケット番号
             reinterpret_cast<sockaddr*>(&m_clientSocketAddress), // src: 相手の情報
@@ -64,19 +65,31 @@ void SimpleServer::waitAccess() {
 
 void SimpleServer::receive() {
     memset(m_receiveBuffer, 0, sizeof(m_receiveBuffer));
-    strcpy(m_receiveBuffer, "Hello"); // + std::char_traits<char>::eof();
+    m_receiveMsgSize = dx::socket::receiveImpl(m_clientSocketDescriptor, m_receiveBuffer, constant::BUF_SIZE_SERVER);
+    dx::err::pAssertWithMsg(m_receiveMsgSize >= 0, "Network.Socket.Server.Accept", "recv() failed.");
+    dx::err::assertWithMsg(m_receiveMsgSize != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
 }
 
 void SimpleServer::prepareSendData() {
     memset(m_sendBuffer, 0, sizeof(m_sendBuffer));
-    strcpy(m_sendBuffer, m_receiveBuffer);
+    std::string data(m_receiveBuffer);
+    std::transform(data.begin(), data.end(), data.begin(), toupper);
+    strcpy(m_sendBuffer, data.c_str());
+    m_sendMsgSize = m_receiveMsgSize;
+    std::cout << std::endl
+        << "data: " << data
+        << ", received: " << m_receiveBuffer
+        << ", send: " << m_sendBuffer
+        << std::endl;
 }
 
 void SimpleServer::send() {
     // 通信
-    sendImpl(m_clientSocketDescriptor, m_sendBuffer, 6);
+    std::cout << "  - 送信: ";
+    m_sendBuffer[m_sendMsgSize] = '\n';
+    sendImpl(m_clientSocketDescriptor, m_sendBuffer, m_sendMsgSize);
     std::cout << "<Test.Socket> " << m_sendBuffer << std::endl;
-    std::cout << "<Test.Socket> " << "07. " << "sent data" << std::endl;
+    std::cout << "<Test.Socket> " << "07. " << "sent data: " << m_sendBuffer << std::endl;
 }
 
 void SimpleServer::shutdownAndClose() {
