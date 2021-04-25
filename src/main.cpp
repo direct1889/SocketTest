@@ -29,16 +29,7 @@ void executeServer(const std::unique_ptr<dx::socket::IServer>& server, const int
     server->createSocketAndStandBy();
     server->waitAccess();
     server->receive();
-    server->proc1();
-    server->send();
-    sleep(1);
-    server->proc2();
-    server->send();
-    sleep(1);
-    server->proc3();
-    server->send();
-    sleep(1);
-    server->proc4();
+    server->prepareSendData();
     server->send();
     server->shutdownAndClose();
 }

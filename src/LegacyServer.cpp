@@ -15,16 +15,15 @@ namespace socket {
 void LegacyServer::initialize(const int portNumber) {
     // ポート番号読み込み
     std::cout << "- ポート番号読み込み: ";
-    serverPortNumber = static_cast<ushort>(portNumber);
-    dx::err::assertWithMsg(serverPortNumber != 0, "Network.Socket.Server.Accept", "invalid port number.\n");
-    std::cout << "success (PortNum: " << serverPortNumber << ")" << std::endl;
+    dx::err::assertWithMsg(portNumber != 0, "Network.Socket.Server.Accept", "invalid port number.\n");
+    std::cout << "success (PortNum: " << portNumber << ")" << std::endl;
 
     // sockaddr_in 設定: ソケットとアドレスを紐付けるための情報
     std::cout << "- sockaddr_in設定: ";
-    memset(&serverSocketAddress, 0, sizeof(serverSocketAddress)); // 確保した領域を0クリア
-    serverSocketAddress.sin_family      = AF_INET; // IPv4 を表す
-    serverSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // サーバのNICに複数のIPアドレスが割り当てられていた場合でもポート番号に応じてすべてのIPアドレス宛の接続を受け付けられるようになる
-    serverSocketAddress.sin_port        = htons(serverPortNumber);
+    memset(&m_serverSocketAddress, 0, sizeof(m_serverSocketAddress)); // 確保した領域を0クリア
+    m_serverSocketAddress.sin_family      = AF_INET; // IPv4 を表す
+    m_serverSocketAddress.sin_addr.s_addr = htonl(INADDR_ANY); // サーバのNICに複数のIPアドレスが割り当てられていた場合でもポート番号に応じてすべてのIPアドレス宛の接続を受け付けられるようになる
+    m_serverSocketAddress.sin_port        = htons(portNumber);
     // htonl(), htons(): ビッグエンディアンに変換 (Host TO Network Long/Short)
     std::cout << "done" << std::endl;
 }
@@ -32,14 +31,14 @@ void LegacyServer::initialize(const int portNumber) {
 void LegacyServer::createSocketAndStandBy() {
     // ソケット作成
     std::cout << "- ソケット作成: ";
-    serverSocketDescriptor = ::socket(
+    m_serverSocketDescriptor = ::socket(
         PF_INET, // プロトコルファミリ // TCP/IPプロトコルファミリを指定 (AF_INETでもほぼ同じ)
         SOCK_STREAM, // ソケットの種類 // TCPはストリーム型プロトコルなので SOCK_STREAM
         IPPROTO_TCP); // プロトコル // TCPを指定 (0で自動判別でもよいが明示しておく)
     // cf. 各引数に指定できる値
     //   - /usr/include/bits/socket.h
     //   - /usr/include/netinet/in.h
-    dx::err::pAssertWithMsg(serverSocketDescriptor >= 0, "Network.Socket.Server.Accept", "socket() failed.\n");
+    dx::err::pAssertWithMsg(m_serverSocketDescriptor >= 0, "Network.Socket.Server.Accept", "socket() failed.\n");
     std::cout << "success" << std::endl;
 
     // ソケット命名: ソケットにIPアドレス/ポート番号を紐付け
@@ -47,9 +46,9 @@ void LegacyServer::createSocketAndStandBy() {
     std::cout << "- ソケット命名: ";
     {
         const int returnCode = bind(
-            serverSocketDescriptor, // 紐付ける対象のソケット識別子
-            reinterpret_cast<sockaddr*>(&serverSocketAddress), // 紐付けたい情報
-            sizeof(serverSocketAddress)); // 情報の型データ長
+            m_serverSocketDescriptor, // 紐付ける対象のソケット識別子
+            reinterpret_cast<sockaddr*>(&m_serverSocketAddress), // 紐付けたい情報
+            sizeof(m_serverSocketAddress)); // 情報の型データ長
         // sockaddr: ソケットAPIの汎用的なデータ型
         // sockaddr_in: TCP/IPに特化したデータ型
         dx::err::pAssertWithMsg(returnCode >= 0, "Network.Socket.Server.Accept", "bind() failed.");
@@ -63,7 +62,7 @@ void LegacyServer::createSocketAndStandBy() {
     // client からの接続要求(SYN)の受付を開始
     std::cout << "- SYN受付開始: ";
     {
-        const int returnCode = listen(serverSocketDescriptor, constant::QUEUE_LIMIT);
+        const int returnCode = listen(m_serverSocketDescriptor, constant::QUEUE_LIMIT);
         dx::err::pAssertWithMsg(returnCode >= 0, "Network.Socket.Server.Accept", "listen() failed.");
     }
     // 通信の手順
@@ -78,54 +77,62 @@ void LegacyServer::createSocketAndStandBy() {
 }
 
 void LegacyServer::waitAccess() {
-    clientSocketAddressLength = sizeof(clientSocketAddress);
+    socklen_t clientSocketAddressLength = sizeof(m_clientSocketAddress);
     // accept() でキューから ESTABLISHED なソケット構造体を取り出す
     std::cout << "- 接続待機: " << std::endl;
-    clientSocketDescriptor = accept(
-        serverSocketDescriptor,
-        reinterpret_cast<sockaddr*>(&clientSocketAddress),
+    m_clientSocketDescriptor = accept(
+        m_serverSocketDescriptor,
+        reinterpret_cast<sockaddr*>(&m_clientSocketAddress),
         &clientSocketAddressLength);
-    dx::err::pAssertWithMsg(clientSocketDescriptor >= 0, "Network.Socket.Server.Accept", "accept() failed.");
-    std::cout << "success (connected from " << inet_ntoa(clientSocketAddress.sin_addr) << ")" << std::endl;
+    dx::err::pAssertWithMsg(m_clientSocketDescriptor >= 0, "Network.Socket.Server.Accept", "accept() failed.");
+    std::cout << "success (connected from " << inet_ntoa(m_clientSocketAddress.sin_addr) << ")" << std::endl;
 }
 
 void LegacyServer::receive() {
     std::cout << "  - 受信: ";
-    memset(receiveBuffer, 0, constant::BUF_SIZE_SERVER);
-    receiveMsgSize = dx::socket::receiveImpl(clientSocketDescriptor, receiveBuffer, constant::BUF_SIZE_SERVER);
+    memset(m_receiveBuffer, 0, constant::BUF_SIZE_SERVER);
+    m_receiveMsgSize = dx::socket::receiveImpl(m_clientSocketDescriptor, m_receiveBuffer, constant::BUF_SIZE_SERVER);
     // 受信失敗時はエラー終了
-    dx::err::pAssertWithMsg(receiveMsgSize >= 0, "Network.Socket.Server.Accept", "recv() failed.");
+    dx::err::pAssertWithMsg(m_receiveMsgSize >= 0, "Network.Socket.Server.Accept", "recv() failed.");
     // 単にメッセージが空なだけなら再度待ち受けを行う (接続が切断された場合など)
-    dx::err::assertWithMsg(receiveMsgSize != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
-    std::cout << "success (size=" << receiveMsgSize << ", msg=\"" << receiveBuffer << "\")" << std::endl;
+    dx::err::assertWithMsg(m_receiveMsgSize != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
+    std::cout << "success (size=" << m_receiveMsgSize << ", msg=\"" << m_receiveBuffer << "\")" << std::endl;
+}
+
+void LegacyServer::prepareSendData() {
+    memset(m_sendBuffer, 0, sizeof(m_sendBuffer));
+    std::string data(m_receiveBuffer);
+    std::transform(data.begin(), data.end(), data.begin(), toupper);
+    strcpy(m_sendBuffer, data.c_str());
+    m_sendMsgSize = m_receiveMsgSize;
 }
 
 void LegacyServer::send() {
     std::cout << "  - 送信: ";
-    receiveBuffer[receiveMsgSize] = '\n';
-    sendMsgSize = dx::socket::sendImpl(clientSocketDescriptor, receiveBuffer, receiveMsgSize + 1);
+    m_sendBuffer[m_sendMsgSize] = '\n';
+    const auto sendMsgSize = dx::socket::sendImpl(m_clientSocketDescriptor, m_sendBuffer, m_sendMsgSize + 1);
     dx::err::pAssertWithMsg(sendMsgSize >= 0, "Network.Socket.Server.Accept", "send() failed.");
-    dx::err::assertWithMsg(receiveMsgSize != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
-    std::cout << "success (size=" << sendMsgSize << ", msg=\"" << receiveBuffer << "\")" << std::endl;
+    dx::err::assertWithMsg(m_sendMsgSize != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
+    std::cout << "success (size=" << sendMsgSize << ", msg=\"" << m_sendBuffer << "\")" << std::endl;
 }
 
 void LegacyServer::shutdownAndClose() {
-    close(clientSocketDescriptor);
-    close(serverSocketDescriptor);
+    close(m_clientSocketDescriptor);
+    close(m_serverSocketDescriptor);
     std::cout << "all finised and exit." << std::endl;
 }
 
 void LegacyServer::proc1() {
-    std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), toupper);
+    // std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), toupper);
 }
 void LegacyServer::proc2() {
-    std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), tolower);
+    // std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), tolower);
 }
 void LegacyServer::proc3() {
-    std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), toupper);
+    // std::transform(m_data1.begin(), m_data1.end(), m_data1.begin(), toupper);
 }
 void LegacyServer::proc4() {
-    m_data1 = constant::endOfMessages;
+    // m_data1 = constant::endOfMessages;
 }
 
 }

@@ -35,7 +35,7 @@ namespace socket {
 int receiveImpl(int socketDescriptor, char* buffer, int bufferSize) {
     std::cout << "[receiveImpl] "
         << "socketDescriptor: " << socketDescriptor
-        << ", bufferSize: " << bufferSize << std::endl;
+        << ", bufferSize: " << bufferSize << ": ";
     return recv(
         socketDescriptor, // 接続確立済みのソケットディスクリプタ
         buffer, // 受信メッセージの格納先のポインタ
@@ -47,7 +47,7 @@ int sendImpl(int socketDescriptor, const std::string& msg, int msgSize) {
     std::cout << "[sendImpl] "
         << "socketDescriptor: " << socketDescriptor
         << ", msg: " << msg
-        << ", msgSize: " << msgSize << std::endl;
+        << ", msgSize: " << msgSize << ": ";
     return send(
         socketDescriptor, // 接続確立済みのソケットディスクリプタ
         msg.c_str(), // 送信メッセージのポインタ
@@ -59,7 +59,7 @@ int sendImpl(int socketDescriptor, char* msg, int msgSize) {
     std::cout << "[sendImpl] "
         << "socketDescriptor: " << socketDescriptor
         << ", msg: " << msg
-        << ", msgSize: " << msgSize << std::endl;
+        << ", msgSize: " << msgSize << ": ";
     return send(
         socketDescriptor, // 接続確立済みのソケットディスクリプタ
         msg, // 送信メッセージのポインタ

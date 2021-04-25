@@ -54,6 +54,7 @@ class IServer {
         virtual void createSocketAndStandBy() = 0;
         virtual void waitAccess() = 0;
         virtual void receive() = 0;
+        virtual void prepareSendData() = 0;
         virtual void send() = 0;
         virtual void shutdownAndClose() = 0;
 

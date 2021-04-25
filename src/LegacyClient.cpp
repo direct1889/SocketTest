@@ -28,7 +28,7 @@ void LegacyClient::initialize(const int serverPortNumber, const std::string& ipA
     m_serverSocketAddress.sin_port = htons(serverPortNumber);
     // inet_aton(ipv4Str, dest*): IPv4ドット10進数表記文字列をネットワークバイトオーダーのバイナリ値へ変換してdestに書き込む (InterNET Address TO Network)
     // - inet_addr() もほぼ同じ処理だが、エラー時の戻り値が-1(=255.255.255.255)がIPアドレスとして有効なので微妙な気がする
-    std::cout << "success (IPAddress: " << 1 << ", PortNum: " << serverPortNumber << ")" << std::endl;
+    std::cout << "success (IPAddress: " << ipAddressStr << ", PortNum: " << serverPortNumber << ")" << std::endl;
 }
 
 void LegacyClient::createSocket() {
@@ -88,17 +88,16 @@ void LegacyClient::send() {
 void LegacyClient::receive() {
     int byteReceived = 0; // 受信したバッファのバイト数
     int byteIndex = 0; // 受信バッファの配列の index
-    char receiveBuffer[constant::BUF_SIZE_CLIENT]; // receive temporary buffer
     // 受信バッファキューに溜まっているバイト列を取り込む
     // - 受信バッファキュー == netstat::Recv-Q
     // - recv と言ってもOSに受信バッファに溜まったバイト列をユーザプロセスに転移するよう依頼しているだけ
     // - 受信処理自体は recv() とは関係なく常に行われている
-    // @return 受信したバイト数
+    // @return 受信しバイト数
     while (byteIndex < constant::MSG_SIZE_CLIENT) { // バイト数が指定地を超えるまで受信を繰り返す
         std::cout << "  - 受信: ";
         byteReceived = dx::socket::receiveImpl(
             m_socketDescriptor, // 接続確立済みのソケットディスクリプタ
-            &receiveBuffer[byteIndex], // 受信メッセージの格納先のポインタ
+            &m_receiveBuffer[byteIndex], // 受信メッセージの格納先のポインタ
             1); // 受信メッセージの長さ
             // 0); // recv()の動作変更用フラグ // 0ならデフォルト: 受信可能になるまでプログラムの動作をブロックする
         dx::err::pAssertWithMsg(!(byteReceived < 0), "Network.Socket.Server.Accept", "recv() failed.");
@@ -107,22 +106,22 @@ void LegacyClient::receive() {
 
         // 区切り文字と一致した場合、ヌル文字に置き換えて文字列の終端とする
         std::cout << "  - 受信完了判定: ";
-        if (receiveBuffer[byteIndex] == constant::endOfMessage){
-            receiveBuffer[byteIndex] = '\0';
+        if (m_receiveBuffer[byteIndex] == constant::endOfMessage){
+            m_receiveBuffer[byteIndex] = '\0';
             // さらにその一連の文字列が指定値の場合ソケットを閉じる
-            if (strcmp(receiveBuffer, constant::endOfMessages.c_str()) == 0) {
-                std::cout << "completed all input (data=\"" << receiveBuffer << "\")" << std::endl;
+            if (strcmp(m_receiveBuffer, constant::endOfMessages.c_str()) == 0) {
+                std::cout << "completed all input (data=\"" << m_receiveBuffer << "\")" << std::endl;
                 close(m_socketDescriptor);
                 return;
             } else {
-                std::cout << "completed current line (data=\"" << receiveBuffer << "\")" << std::endl;
+                std::cout << "completed current line (data=\"" << m_receiveBuffer << "\")" << std::endl;
                 break;
             }
         }
         // まだ終端でなかった場合 index を進める
         byteIndex += byteReceived;
-        receiveBuffer[byteIndex] = '\0';
-        std::cout << "incompleted (data=\"" << receiveBuffer << "\")" << std::endl;
+        m_receiveBuffer[byteIndex] = '\0';
+        std::cout << "incompleted (data=\"" << m_receiveBuffer << "\")" << std::endl;
     }
 }
 

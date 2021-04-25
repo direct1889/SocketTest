@@ -31,26 +31,21 @@ class LegacyClient final : public IClient {
 class LegacyServer final : public IServer {
     private: // constant
     private: // field
-        int m_sock0 = 0;
-        sockaddr_in m_addr;
-        sockaddr_in m_client;
-        int m_sock = 0;
-        std::string m_data1;
-
-        int32_t serverSocketDescriptor;
-        int32_t clientSocketDescriptor;
-        sockaddr_in serverSocketAddress; // server internet socket address
-        sockaddr_in clientSocketAddress; // client internet socket address
-        ushort serverPortNumber; // server port number
-        uint32_t clientSocketAddressLength; // client internet socket address length
-        char receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
-        int receiveMsgSize, sendMsgSize; // recieve and send buffer size
+        int32_t m_serverSocketDescriptor = 0;
+        int32_t m_clientSocketDescriptor = 0;
+        sockaddr_in m_serverSocketAddress; // server internet socket address
+        sockaddr_in m_clientSocketAddress; // client internet socket address
+        char m_sendBuffer[constant::BUF_SIZE_SERVER]; // send temporary buffer
+        char m_receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
+        int m_sendMsgSize; // send buffer size
+        int m_receiveMsgSize; // recieve buffer size
 
     public: // public
         void initialize(int portNumber) override;
         void createSocketAndStandBy() override;
         void waitAccess() override;
         void receive() override;
+        void prepareSendData() override;
         void send() override;
         void shutdownAndClose() override;
 

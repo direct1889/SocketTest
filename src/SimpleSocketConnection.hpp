@@ -31,10 +31,12 @@ class SimpleClient final : public IClient {
 class SimpleServer final : public IServer {
     private: // constant
     private: // field
-        int m_sock0 = 0;
-        sockaddr_in m_addr;
-        sockaddr_in m_client;
-        int m_sock = 0;
+        int32_t m_serverSocketDescriptor = 0;
+        int32_t m_clientSocketDescriptor = 0;
+        sockaddr_in m_serverSocketAddress;
+        sockaddr_in m_clientSocketAddress;
+        char m_sendBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
+        char m_receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
         std::string m_data1;
 
     public: // public
@@ -42,6 +44,7 @@ class SimpleServer final : public IServer {
         void createSocketAndStandBy() override;
         void waitAccess() override;
         void receive() override;
+        void prepareSendData() override;
         void send() override;
         void shutdownAndClose() override;
 
