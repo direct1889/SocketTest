@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstddef>
 
 namespace dx {
 namespace err {
@@ -38,8 +39,7 @@ class IClient {
         virtual void initialize(int portNumber, const std::string& ipAddressStr) = 0;
         virtual void createSocket() = 0;
         virtual void requestConnection() = 0;
-        virtual void prepareSendData() = 0;
-        virtual void send() = 0;
+        virtual void send(std::byte data[], size_t dataSize) = 0;
         virtual void receive() = 0;
         virtual void shutdownAndClose() = 0;
     protected:
@@ -54,14 +54,8 @@ class IServer {
         virtual void createSocketAndStandBy() = 0;
         virtual void waitAccess() = 0;
         virtual void receive() = 0;
-        virtual void prepareSendData() = 0;
-        virtual void send() = 0;
+        virtual void send(std::byte data[], size_t dataSize) = 0;
         virtual void shutdownAndClose() = 0;
-
-        virtual void proc1() = 0;
-        virtual void proc2() = 0;
-        virtual void proc3() = 0;
-        virtual void proc4() = 0;
     protected:
         IServer() = default;
     public:

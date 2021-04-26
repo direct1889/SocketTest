@@ -17,8 +17,7 @@ class LegacyClient final : public IClient {
         void initialize(int serverPortNumber, const std::string& ipAddressStr) override;
         void createSocket() override;
         void requestConnection() override;
-        void prepareSendData() override;
-        void send() override;
+        void send(std::byte data[], size_t dataSize) override;
         void receive() override;
         void shutdownAndClose() override;
 
@@ -37,22 +36,14 @@ class LegacyServer final : public IServer {
         sockaddr_in m_clientSocketAddress; // client internet socket address
         char m_sendBuffer[constant::BUF_SIZE_SERVER]; // send temporary buffer
         char m_receiveBuffer[constant::BUF_SIZE_SERVER]; // receive temporary buffer
-        int m_sendMsgSize = 0; // send buffer size
-        int m_receiveMsgSize = 0; // recieve buffer size
 
     public: // public
         void initialize(int portNumber) override;
         void createSocketAndStandBy() override;
         void waitAccess() override;
         void receive() override;
-        void prepareSendData() override;
-        void send() override;
+        void send(std::byte data[], size_t dataSize) override;
         void shutdownAndClose() override;
-
-        void proc1() override;
-        void proc2() override;
-        void proc3() override;
-        void proc4() override;
 
     public: // ctor/dtor
         LegacyServer() = default;

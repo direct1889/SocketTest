@@ -1,8 +1,3 @@
-// using System;
-// using System.Net;
-// using System.Net.Sockets;
-// using System.Text;
-
 namespace dx
 {
     public static class Err
@@ -33,7 +28,7 @@ namespace dx.Socket
         void CreateSocket();
         void RequestConnection();
         void Send(byte[] data);
-        void Receive();
+        string Receive();
         void ShutdownAndClose();
     }
 
@@ -42,7 +37,7 @@ namespace dx.Socket
         void CreateSocketAndStandBy();
         void WaitAccess();
         void Send(byte[] data);
-        void Receive();
+        string Receive();
         void ShutdownAndClose();
     }
 }

@@ -5,7 +5,7 @@
 namespace dx {
 namespace socket {
 
-class SimpleClient final : public IClient {
+class SimpleClient final {// : public IClient {
     private: // constant
     private: // field
         int m_socketDescriptor = 0;
@@ -14,13 +14,13 @@ class SimpleClient final : public IClient {
         char m_receiveBuffer[constant::BUF_SIZE_CLIENT];
 
     public: // public
-        void initialize(int portNumber, const std::string& ipAddressStr) override;
-        void createSocket() override;
-        void requestConnection() override;
-        void prepareSendData() override;
-        void send() override;
-        void receive() override;
-        void shutdownAndClose() override;
+        void initialize(int portNumber, const std::string& ipAddressStr);
+        void createSocket();
+        void requestConnection();
+        void prepareSendData();
+        void send();
+        void receive();
+        void shutdownAndClose();
 
     public: // ctor/dtor
         SimpleClient() = default;
@@ -28,7 +28,7 @@ class SimpleClient final : public IClient {
 };
 
 
-class SimpleServer final : public IServer {
+class SimpleServer final {// : public IServer {
     private: // constant
     private: // field
         int32_t m_serverSocketDescriptor = 0;
@@ -41,18 +41,18 @@ class SimpleServer final : public IServer {
         int m_receiveMsgSize = 0; // recieve buffer size
 
     public: // public
-        void initialize(int portNumber) override;
-        void createSocketAndStandBy() override;
-        void waitAccess() override;
-        void receive() override;
-        void prepareSendData() override;
-        void send() override;
-        void shutdownAndClose() override;
+        void initialize(int portNumber);
+        void createSocketAndStandBy();
+        void waitAccess();
+        void receive();
+        void prepareSendData();
+        void send();
+        void shutdownAndClose();
 
-        void proc1() override;
-        void proc2() override;
-        void proc3() override;
-        void proc4() override;
+        void proc1();
+        void proc2();
+        void proc3();
+        void proc4();
 
     public: // ctor/dtor
         SimpleServer() = default;

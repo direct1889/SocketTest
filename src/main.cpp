@@ -18,9 +18,19 @@ void executeClient(const std::unique_ptr<dx::socket::IClient>& client, const int
     client->initialize(portNumber, ipAddressStr);
     client->createSocket();
     client->requestConnection();
-    client->prepareSendData();
-    client->send();
+
+    char data01[] = "くみれい";
+    client->send(reinterpret_cast<std::byte*>(data01), strlen(data01));
+    std::cout << "sent " << data01 << std::endl;
     client->receive();
+    char data02[] = "ライきり";
+    client->send(reinterpret_cast<std::byte*>(data02), strlen(data02));
+    std::cout << "sent " << data02 << std::endl;
+    client->receive();
+    char data03[] = "はなまいひめ";
+    client->send(reinterpret_cast<std::byte*>(data03), strlen(data03));
+    std::cout << "sent " << data03 << std::endl;
+
     client->shutdownAndClose();
 }
 
@@ -28,9 +38,17 @@ void executeServer(const std::unique_ptr<dx::socket::IServer>& server, const int
     server->initialize(portNumber);
     server->createSocketAndStandBy();
     server->waitAccess();
+
     server->receive();
-    server->prepareSendData();
-    server->send();
+    char data01[] = "あおひな";
+    server->send(reinterpret_cast<std::byte*>(data01), strlen(data01));
+    std::cout << "sent " << data01 << std::endl;
+    server->receive();
+    char data02[] = "あだしま";
+    server->send(reinterpret_cast<std::byte*>(data02), strlen(data02));
+    std::cout << "sent " << data02 << std::endl;
+    server->receive();
+
     server->shutdownAndClose();
 }
 
@@ -75,29 +93,11 @@ int main(const int argc, const char* argv[]) {
 
     switch (side) {
     case Side::CLIENT: {
-        std::unique_ptr<dx::socket::IClient> socketClient = nullptr;
-        switch (mode) {
-        case Mode::SIMPLE: {
-            socketClient = std::make_unique<dx::socket::SimpleClient>();
-        } break;
-        case Mode::LEGACY: {
-            socketClient = std::make_unique<dx::socket::LegacyClient>();
-        } break;
-        case Mode::INVALID: return 1;
-        }
+        std::unique_ptr<dx::socket::IClient> socketClient = std::make_unique<dx::socket::LegacyClient>();
         executeClient(socketClient, loadPortNumber(argv), loadIPAddress(argv));
     } break;
     case Side::SERVER: {
-        std::unique_ptr<dx::socket::IServer> socketServer = nullptr;
-        switch (mode) {
-        case Mode::SIMPLE: {
-            socketServer = std::make_unique<dx::socket::SimpleServer>();
-        } break;
-        case Mode::LEGACY: {
-            socketServer = std::make_unique<dx::socket::LegacyServer>();
-        } break;
-        case Mode::INVALID: return 1;
-        }
+        std::unique_ptr<dx::socket::IServer> socketServer = std::make_unique<dx::socket::LegacyServer>();
         executeServer(socketServer, loadPortNumber(argv));
     } break;
     case Side::INVALID: return 1;

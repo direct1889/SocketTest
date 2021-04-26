@@ -48,11 +48,12 @@ namespace dx.Socket
             m_socket.Send(data);
         }
 
-        public void Receive()
+        public string Receive()
         {
             byte[] bytes = new byte[1024];
             int bytesRec = m_socket.Receive(bytes);
-            Console.WriteLine(Encoding.UTF8.GetString(bytes, 0, bytesRec));
+            return Encoding.UTF8.GetString(bytes, 0, bytesRec);
+            // Console.WriteLine(Encoding.UTF8.GetString(bytes, 0, bytesRec));
         }
 
         public void ShutdownAndClose()

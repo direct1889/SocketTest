@@ -4,9 +4,78 @@ using IServer = dx.Socket.IServer;
 using Server = dx.Socket.Server;
 using Enum = System.Enum;
 using Encoding = System.Text.Encoding;
+using System;
 
 class SocketMain
 {
+    public static void ExecuteClientManual(IClient client, int portNumber, string ipAddressStr)
+    {
+        client.Initialize(portNumber, ipAddressStr);
+        client.CreateSocket();
+        client.RequestConnection();
+
+        while (true) {
+            Console.Write("please enter: ");
+            var str = Console.ReadLine();
+            if (str == dx.Socket.Constant.EndOfMessages) {
+                client.Send(Encoding.UTF8.GetBytes(str));
+                Console.WriteLine("See you...");
+                break;
+            }
+            else if (str.Length == 0) {
+                Console.WriteLine("receive...");
+                var msg = client.Receive();
+                if (msg == dx.Socket.Constant.EndOfMessages) {
+                    Console.WriteLine("See you...");
+                    break;
+                }
+                else {
+                    Console.WriteLine($"received: {msg}");
+                }
+            }
+            else {
+                Console.WriteLine("send...");
+                client.Send(Encoding.UTF8.GetBytes(str));
+            }
+        }
+
+        client.ShutdownAndClose();
+    }
+
+    public static void ExecuteServerManual(IServer server, int portNumber)
+    {
+        server.Initialize(portNumber);
+        server.CreateSocketAndStandBy();
+        server.WaitAccess();
+
+        while (true) {
+            Console.Write("please enter: ");
+            var str = Console.ReadLine();
+            if (str == dx.Socket.Constant.EndOfMessages) {
+                server.Send(Encoding.UTF8.GetBytes(str));
+                Console.WriteLine("See you...");
+                break;
+            }
+            else if (str.Length == 0) {
+                Console.WriteLine("receive...");
+                var msg = server.Receive();
+                if (msg == dx.Socket.Constant.EndOfMessages) {
+                    Console.WriteLine("See you...");
+                    break;
+                }
+                else {
+                    Console.WriteLine($"received: {msg}");
+                }
+            }
+            else {
+                Console.WriteLine("send...");
+                server.Send(Encoding.UTF8.GetBytes(str));
+            }
+        }
+
+        server.ShutdownAndClose();
+    }
+
     public static void ExecuteClient(IClient client, int portNumber, string ipAddressStr)
     {
         client.Initialize(portNumber, ipAddressStr);
@@ -17,7 +86,7 @@ class SocketMain
         client.Receive();
         client.Send(Encoding.UTF8.GetBytes("ライきり"));
         client.Receive();
-        client.Send(Encoding.UTF8.GetBytes("まいひめ"));
+        client.Send(Encoding.UTF8.GetBytes("はなまいひめ"));
 
         client.ShutdownAndClose();
     }
@@ -56,12 +125,12 @@ class SocketMain
             case Side.Client:
             {
                 IClient client = new Client();
-                ExecuteClient(client, int.Parse(argv[2]), argv[3]);
+                ExecuteClientManual(client, int.Parse(argv[2]), argv[3]);
             } break;
             case Side.Server:
             {
                 IServer server = new Server();
-                ExecuteServer(server, int.Parse(argv[2]));
+                ExecuteServerManual(server, int.Parse(argv[2]));
             } break;
         }
     }

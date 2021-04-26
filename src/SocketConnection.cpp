@@ -67,6 +67,9 @@ int sendImpl(int socketDescriptor, char* msg, int msgSize) {
         0); // send()の動作変更用フラグ // 0ならデフォルト: 送信可能になるまでプログラムの動作をブロックする
     // write(socketDescriptor, msg, msgSize);
 }
+int sendImpl(int socketDescriptor, std::byte data[], int dataSize) {
+    return send(socketDescriptor, data, dataSize, 0);
+}
 
 }
 }
