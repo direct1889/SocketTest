@@ -18,6 +18,7 @@ namespace dx.Socket
         #region public
         public void Initialize(int portNumber)
         {
+            Console.WriteLine($"HostName: {Dns.GetHostName()}");
             m_ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             m_ipAddress = m_ipHostInfo.AddressList[0];
             m_localEndPoint = new IPEndPoint(m_ipAddress, portNumber);

@@ -8,13 +8,23 @@ using System;
 
 class SocketMain
 {
-    public static void ExecuteClientManual(IClient client, int portNumber, string ipAddressStr)
+    public static void ExecuteClientManual(Client client, int portNumber, string ipAddressStr)
     {
         client.Initialize(portNumber, ipAddressStr);
         client.CreateSocket();
         client.RequestConnection();
 
-        while (true) {
+        const bool isReceiveHidouki = false;
+        if (isReceiveHidouki) {
+            client.BeginReceive();
+        }
+        while (isReceiveHidouki) {
+            Console.Write("please enter: ");
+            var str = Console.ReadLine();
+            Console.Write("うんうん、それもまたアイカツだね");
+            if (str == "quit") { break; }
+        }
+        while (!isReceiveHidouki) {
             Console.Write("please enter: ");
             var str = Console.ReadLine();
             if (str == dx.Socket.Constant.EndOfMessages) {
@@ -42,7 +52,7 @@ class SocketMain
         client.ShutdownAndClose();
     }
 
-    public static void ExecuteServerManual(IServer server, int portNumber)
+    public static void ExecuteServerManual(Server server, int portNumber)
     {
         server.Initialize(portNumber);
         server.CreateSocketAndStandBy();
@@ -76,7 +86,7 @@ class SocketMain
         server.ShutdownAndClose();
     }
 
-    public static void ExecuteClient(IClient client, int portNumber, string ipAddressStr)
+    public static void ExecuteClient(Client client, int portNumber, string ipAddressStr)
     {
         client.Initialize(portNumber, ipAddressStr);
         client.CreateSocket();
@@ -91,7 +101,7 @@ class SocketMain
         client.ShutdownAndClose();
     }
 
-    public static void ExecuteServer(IServer server, int portNumber)
+    public static void ExecuteServer(Server server, int portNumber)
     {
         server.Initialize(portNumber);
         server.CreateSocketAndStandBy();
@@ -124,12 +134,12 @@ class SocketMain
         {
             case Side.Client:
             {
-                IClient client = new Client();
+                Client client = new Client();
                 ExecuteClientManual(client, int.Parse(argv[2]), argv[3]);
             } break;
             case Side.Server:
             {
-                IServer server = new Server();
+                Server server = new Server();
                 ExecuteServerManual(server, int.Parse(argv[2]));
             } break;
         }
