@@ -5,6 +5,7 @@ using Server = dx.Socket.Server;
 using Enum = System.Enum;
 using Encoding = System.Text.Encoding;
 using System;
+using LogLevel = dx.Socket.Ex.LogLevel;
 
 class SocketMain
 {
@@ -22,7 +23,10 @@ class SocketMain
             Console.Write("please enter: ");
             var str = Console.ReadLine();
             Console.Write("うんうん、それもまたアイカツだね");
-            if (str == "quit") { break; }
+            if (str == "quit") {
+                client.EndReceive();
+                break;
+            }
         }
         while (!isReceiveHidouki) {
             Console.Write("please enter: ");
@@ -34,7 +38,9 @@ class SocketMain
             }
             else if (str.Length == 0) {
                 Console.WriteLine("receive...");
-                var msg = client.Receive();
+                // var msg = client.Receive();
+                client.ReceiveImpl();
+                var msg = "img"; // client.Receive();
                 if (msg == dx.Socket.Constant.EndOfMessages) {
                     Console.WriteLine("See you...");
                     break;
@@ -78,8 +84,28 @@ class SocketMain
                 }
             }
             else {
+                if (str.EndsWith(".png")) {
+                    if (System.IO.File.Exists(str)) {
+                        Console.WriteLine($"Image file is Exist! {str}");
+                        server.SendWithHeaderImagePath(LogLevel.Debug, "Cs.Manual.Server.ImagePath", str);
+                    }
+                    else {
+                        Console.WriteLine($"Image file is not exist! {str}");
+                    }
+                }
+                else if (str.Contains(".")) {
+                    float value = float.Parse(str);
+                    server.SendWithHeaderFloat(LogLevel.Info, "Cs.Manual.Server.Float", value);
+                }
+                else if (str.Contains("0")) {
+                    int value = int.Parse(str);
+                    server.SendWithHeaderInt(LogLevel.Info, "Cs.Manual.Server.Int", value);
+                }
+                else {
+                    server.SendWithHeaderString(LogLevel.Info, "Cs.Manual.Server.String", str);
+                }
                 Console.WriteLine("send...");
-                server.Send(Encoding.UTF8.GetBytes(str));
+                // server.Send(Encoding.UTF8.GetBytes(str));
             }
         }
 
@@ -127,6 +153,14 @@ class SocketMain
 
     public static void Main(string[] argv)
     {
+        if (false) {
+        var desc = dx.Socket.Ex.CreateDescTemp("くみれい");
+        var bytes = dx.Socket.Ex.ToByteRevenge(desc);
+        Console.WriteLine($"encoded: {bytes[0]}");
+        var desc02 = dx.Socket.Ex.FromByteDataRevenge(bytes);
+        Console.WriteLine($"decoded: {desc.header.dataType.ToString()}, {dx.Socket.Ex.FromDescTemp(desc)}");
+        return;
+        }
         // C# のコマンドライン引数は 0 はじまり
         // Mode mode = (Mode)Enum.Parse(typeof(Mode), argv[0], true);
         Side side = (Side)Enum.Parse(typeof(Side), argv[1], true);

@@ -19,6 +19,7 @@ class LegacyClient final : public IClient {
         void requestConnection() override;
         void send(std::byte data[], size_t dataSize) override;
         void receive() override;
+        std::string receive02();
         void shutdownAndClose() override;
 
     public: // ctor/dtor
@@ -42,6 +43,7 @@ class LegacyServer final : public IServer {
         void createSocketAndStandBy() override;
         void waitAccess() override;
         void receive() override;
+        std::string receive02();
         void send(std::byte data[], size_t dataSize) override;
         void shutdownAndClose() override;
 

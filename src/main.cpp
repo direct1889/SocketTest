@@ -14,6 +14,47 @@ std::string loadIPAddress(const char* argv[]) {
     return argv[4];
 }
 
+bool isReceive(const std::string& buf) {
+    return buf.empty() || buf.front() == 'r';
+}
+
+void executeClientManual(const std::unique_ptr<dx::socket::LegacyClient>& client, const int portNumber, const std::string& ipAddressStr) {
+    client->initialize(portNumber, ipAddressStr);
+    client->createSocket();
+    client->requestConnection();
+
+    while (true) {
+        std::cout << "please enter: ";
+        std::string buf;
+        std::cin >> buf;
+        char str[1024];
+        if (!isReceive(buf)) {
+            memcpy(str, buf.c_str(), buf.size());
+        }
+
+        if (str == dx::socket::constant::endOfMessages) {
+            client->send(reinterpret_cast<std::byte*>(str), buf.size());
+                std::cout << "See you..." << std::endl;
+            break;
+        }
+        else if (isReceive(buf)) {
+            std::cout << "receive... " << std::endl;
+            const auto msg = client->receive02();
+            std::cout << "received: " << msg << std::endl;
+            if (msg == dx::socket::constant::endOfMessages) {
+                std::cout << "See you..." << std::endl;
+                break;
+            }
+        }
+        else {
+            std::cout << "send... " << std::endl;
+            client->send(reinterpret_cast<std::byte*>(str), buf.size());
+        }
+    }
+
+    client->shutdownAndClose();
+}
+
 void executeClient(const std::unique_ptr<dx::socket::IClient>& client, const int portNumber, const std::string& ipAddressStr) {
     client->initialize(portNumber, ipAddressStr);
     client->createSocket();
@@ -32,6 +73,45 @@ void executeClient(const std::unique_ptr<dx::socket::IClient>& client, const int
     std::cout << "sent " << data03 << std::endl;
 
     client->shutdownAndClose();
+}
+
+void executeServerManual(const std::unique_ptr<dx::socket::LegacyServer>& server, const int portNumber) {
+    server->initialize(portNumber);
+    server->createSocketAndStandBy();
+    server->waitAccess();
+
+    while (true) {
+        std::cout << "please enter: ";
+        std::string buf;
+        std::cin >> buf;
+        char str[1024];
+        if (!isReceive(buf)) {
+            memcpy(str, buf.c_str(), buf.size());
+        }
+
+        if (str == dx::socket::constant::endOfMessages) {
+            server->send(reinterpret_cast<std::byte*>(str), buf.size());
+                std::cout << "See you..." << std::endl;
+            break;
+        }
+        else if (isReceive(buf)) {
+            std::cout << "receive... " << std::endl;
+            const auto msg = server->receive02();
+            if (msg == dx::socket::constant::endOfMessages) {
+                std::cout << "See you..." << std::endl;
+                break;
+            }
+            else {
+                std::cout << "received: " << msg << std::endl;
+            }
+        }
+        else {
+            std::cout << "send... " << std::endl;
+            server->send(reinterpret_cast<std::byte*>(str), buf.size());
+        }
+    }
+
+    server->shutdownAndClose();
 }
 
 void executeServer(const std::unique_ptr<dx::socket::IServer>& server, const int portNumber) {
@@ -93,12 +173,12 @@ int main(const int argc, const char* argv[]) {
 
     switch (side) {
     case Side::CLIENT: {
-        std::unique_ptr<dx::socket::IClient> socketClient = std::make_unique<dx::socket::LegacyClient>();
-        executeClient(socketClient, loadPortNumber(argv), loadIPAddress(argv));
+        std::unique_ptr<dx::socket::LegacyClient> socketClient = std::make_unique<dx::socket::LegacyClient>();
+        executeClientManual(socketClient, loadPortNumber(argv), loadIPAddress(argv));
     } break;
     case Side::SERVER: {
-        std::unique_ptr<dx::socket::IServer> socketServer = std::make_unique<dx::socket::LegacyServer>();
-        executeServer(socketServer, loadPortNumber(argv));
+        std::unique_ptr<dx::socket::LegacyServer> socketServer = std::make_unique<dx::socket::LegacyServer>();
+        executeServerManual(socketServer, loadPortNumber(argv));
     } break;
     case Side::INVALID: return 1;
     }

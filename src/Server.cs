@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static dx.Socket.Ex;
 
 namespace dx.Socket
 {
@@ -39,6 +40,36 @@ namespace dx.Socket
         public void Send(byte[] data)
         {
             m_clientSocket.Send(data);
+        }
+
+        public void SendWithHeader(DataType dataType, Ex.LogLevel level, string category, byte[] data) {
+            Desc desc = new Desc {
+                header = new Header(dataType, data.Length),
+                // level = level,
+                // category = category,
+                rawData = data,
+            };
+
+            var rtn = m_clientSocket.Send(ToByteRevenge(desc));
+            Console.WriteLine($"send with header: {rtn}");
+        }
+        public void SendWithHeaderInt(Ex.LogLevel level, string category, int data) {
+            SendWithHeader(DataType.Int, level, category, BitConverter.GetBytes(data));
+        }
+        public void SendWithHeaderFloat(Ex.LogLevel level, string category, float data) {
+            SendWithHeader(DataType.Float, level, category, BitConverter.GetBytes(data));
+        }
+        public void SendWithHeaderString(Ex.LogLevel level, string category, string data) {
+            SendWithHeader(DataType.String, level, category, Encoding.UTF8.GetBytes(data));
+        }
+        public void SendWithHeaderImagePath(Ex.LogLevel level, string category, string pngPath) {
+            byte[] buf = null;
+            using (var fs = new System.IO.FileStream(pngPath, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            {
+                buf = new byte[fs.Length];
+                fs.Read(buf, 0, buf.Length);
+            }
+            SendWithHeader(DataType.Image, level, category, buf);
         }
 
         public string Receive()

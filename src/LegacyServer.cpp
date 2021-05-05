@@ -51,6 +51,15 @@ void LegacyServer::receive() {
     std::cout << "received: " << reinterpret_cast<char*>(receiveBuffer) << " (" << byteReceived << ")" << std::endl;
 }
 
+std::string LegacyServer::receive02() {
+    std::byte receiveBuffer[constant::MSG_SIZE_SERVER];
+    memset(receiveBuffer, 0, constant::MSG_SIZE_SERVER);
+    const int byteReceived = ::recv(m_clientSocketDescriptor, receiveBuffer, constant::MSG_SIZE_SERVER, 0);
+    dx::err::pAssertWithMsg(byteReceived >= 0, "Network.Socket.Server.Accept", "recv() failed.");
+    dx::err::assertWithMsg(byteReceived != 0, "Network.Socket.Server.Accept", "failed (connection closed by foreign host.)");
+    return std::string(reinterpret_cast<char*>(receiveBuffer));
+}
+
 void LegacyServer::send(std::byte data[], const size_t dataSize) {
     const auto sendMsgSize = ::send(m_clientSocketDescriptor, data, dataSize, 0);
     dx::err::pAssertWithMsg(sendMsgSize >= 0, "Network.Socket.Server.Accept", "send() failed.");

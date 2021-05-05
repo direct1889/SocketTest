@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static dx.Socket.Ex;
 
 namespace dx.Socket
 {
@@ -48,12 +49,44 @@ namespace dx.Socket
             m_socket.Send(data);
         }
 
+        public void SendWithHeader(DataType dataType, Ex.LogLevel level, string category, byte[] data) {
+            Desc desc = new Desc {
+                header = new Header(dataType, data.Length),
+                // level = level,
+                // category = category,
+                rawData = data,
+            };
+
+            // m_socket.Send(desc.ToByteData());
+        }
+
         public string Receive()
         {
             byte[] bytes = new byte[1024];
             int bytesRec = m_socket.Receive(bytes);
             return Encoding.UTF8.GetString(bytes, 0, bytesRec);
             // Console.WriteLine(Encoding.UTF8.GetString(bytes, 0, bytesRec));
+        }
+        public void ReceiveImpl()
+        {
+            byte[] bytes = new byte[1024];
+            Console.WriteLine($"created buffer");
+            int bytesRec = m_socket.Receive(bytes);
+            Console.WriteLine($"received");
+            int size = PrecheckAllSize(bytes);
+            if (size > 1024) {
+                bytes = new byte[size];
+                Console.WriteLine($"reallocate buffer (data size: {size})");
+            }
+            Desc desc = FromByteDataRevenge(bytes);
+            // if (desc == null) { Console.WriteLine($"data is too long to receive"); return; }
+            Console.WriteLine($"to desc");
+            switch (desc.header.dataType) {
+                case DataType.Int: Console.WriteLine($"Int: {BitConverter.ToInt32(desc.rawData)}"); break;
+                case DataType.Float: Console.WriteLine($"Float: {BitConverter.ToSingle(desc.rawData)}"); break;
+                case DataType.String: Console.WriteLine($"String: {Encoding.UTF8.GetString(desc.rawData)}"); break;
+                case DataType.Image: Console.WriteLine($"Image: can't open here"); break;
+            }
         }
 
         //非同期データ受信のための状態オブジェクト
@@ -77,6 +110,9 @@ namespace dx.Socket
                 SocketFlags.None,
                 new AsyncCallback(ReceiveDataCallback),
                 stateObject);
+        }
+        public void EndReceive() {
+            // m_socket.EndReceive();
         }
         private static void ReceiveDataCallback(IAsyncResult result) {
             //状態オブジェクトの取得
