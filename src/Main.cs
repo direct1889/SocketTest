@@ -68,7 +68,8 @@ class SocketMain
             Console.Write("please enter: ");
             var str = Console.ReadLine();
             if (str == dx.Socket.Constant.EndOfMessages) {
-                server.Send(Encoding.UTF8.GetBytes(str));
+                server.SendWithHeaderString(LogLevel.Info, "Cs.Manual.Server.String", str);
+                // server.Send(Encoding.UTF8.GetBytes(str));
                 Console.WriteLine("See you...");
                 break;
             }
@@ -85,6 +86,7 @@ class SocketMain
             }
             else {
                 if (str.EndsWith(".png")) {
+                    str = "/Users/kazuaki/Documents/develop/Network/SocketTest02/" + str;
                     if (System.IO.File.Exists(str)) {
                         Console.WriteLine($"Image file is Exist! {str}");
                         server.SendWithHeaderImagePath(LogLevel.Debug, "Cs.Manual.Server.ImagePath", str);
