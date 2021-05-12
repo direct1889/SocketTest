@@ -57,8 +57,28 @@ namespace dx.Socket
                 rawData = data,
             };
 
-            // m_socket.Send(desc.ToByteData());
+            var rtn = m_socket.Send(ToByteRevenge(desc));
+            Console.WriteLine($"send with header: {rtn}");
         }
+        public void SendWithHeaderInt(Ex.LogLevel level, string category, int data) {
+            SendWithHeader(DataType.Int, level, category, BitConverter.GetBytes(data));
+        }
+        public void SendWithHeaderFloat(Ex.LogLevel level, string category, float data) {
+            SendWithHeader(DataType.Float, level, category, BitConverter.GetBytes(data));
+        }
+        public void SendWithHeaderString(Ex.LogLevel level, string category, string data) {
+            SendWithHeader(DataType.String, level, category, Encoding.UTF8.GetBytes(data));
+        }
+        public void SendWithHeaderImagePath(Ex.LogLevel level, string category, string pngPath) {
+            byte[] buf = null;
+            using (var fs = new System.IO.FileStream(pngPath, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            {
+                buf = new byte[fs.Length];
+                fs.Read(buf, 0, buf.Length);
+            }
+            SendWithHeader(DataType.Image, level, category, buf);
+        }
+
 
         public string Receive()
         {

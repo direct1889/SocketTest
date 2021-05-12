@@ -32,15 +32,14 @@ class SocketMain
             Console.Write("please enter: ");
             var str = Console.ReadLine();
             if (str == dx.Socket.Constant.EndOfMessages) {
-                client.Send(Encoding.UTF8.GetBytes(str));
+                client.SendWithHeaderString(LogLevel.Info, "Cs.Manual.Client.String", str);
+                // client.Send(Encoding.UTF8.GetBytes(str));
                 Console.WriteLine("See you...");
                 break;
             }
             else if (str.Length == 0) {
                 Console.WriteLine("receive...");
-                // var msg = client.Receive();
-                client.ReceiveImpl();
-                var msg = "img"; // client.Receive();
+                var msg = client.Receive();
                 if (msg == dx.Socket.Constant.EndOfMessages) {
                     Console.WriteLine("See you...");
                     break;
@@ -50,8 +49,29 @@ class SocketMain
                 }
             }
             else {
+                if (str.EndsWith(".png")) {
+                    str = "/Users/kazuaki/Documents/develop/Network/SocketTest02/" + str;
+                    if (System.IO.File.Exists(str)) {
+                        Console.WriteLine($"Image file is Exist! {str}");
+                        client.SendWithHeaderImagePath(LogLevel.Debug, "Cs.Manual.Client.ImagePath", str);
+                    }
+                    else {
+                        Console.WriteLine($"Image file is not exist! {str}");
+                    }
+                }
+                else if (str.Contains(".")) {
+                    float value = float.Parse(str);
+                    client.SendWithHeaderFloat(LogLevel.Info, "Cs.Manual.Client.Float", value);
+                }
+                else if (str.Contains("0")) {
+                    int value = int.Parse(str);
+                    client.SendWithHeaderInt(LogLevel.Info, "Cs.Manual.Client.Int", value);
+                }
+                else {
+                    client.SendWithHeaderString(LogLevel.Info, "Cs.Manual.Client.String", str);
+                }
                 Console.WriteLine("send...");
-                client.Send(Encoding.UTF8.GetBytes(str));
+                // client.Send(Encoding.UTF8.GetBytes(str));
             }
         }
 

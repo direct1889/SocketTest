@@ -22,6 +22,7 @@ namespace dx.Socket
             Console.WriteLine($"HostName: {Dns.GetHostName()}");
             m_ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             m_ipAddress = m_ipHostInfo.AddressList[0];
+            Console.WriteLine($"ipAddr:{m_ipAddress}, port:{portNumber}");
             m_localEndPoint = new IPEndPoint(m_ipAddress, portNumber);
         }
 
